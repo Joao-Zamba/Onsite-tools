@@ -1,0 +1,42 @@
+# Onsite Mobile Device Configuration Tool
+# Erstellt von: João Zamba
+# Beschreibung: Automatisiert die grundlegende Einrichtung von Firmen-Handys
+
+Write-Host "[INFO] Starte Firmen-Handy-Konfiguration..." -ForegroundColor Cyan
+
+# 1. Überprüfen, ob das Gerät verbunden ist
+$devices = Get-PnpDevice | Where-Object { $_.FriendlyName -match "Android|iPhone" }
+if (-not $devices) {
+    Write-Host "[ERROR] Kein mobiles Gerät erkannt. Bitte verbinden Sie ein Handy." -ForegroundColor Red
+    exit
+}
+Write-Host "[OK] Gerät erkannt: $($devices.FriendlyName)" -ForegroundColor Green
+
+# 2. WLAN-Konfiguration
+$wifiSSID = "Firmen-Netzwerk"
+$wifiPassword = "SicheresPasswort123"
+Write-Host "[INFO] Richte WLAN '$wifiSSID' ein..." -ForegroundColor Yellow
+netsh wlan add profile filename="Firmennetzwerk.xml"
+Write-Host "[OK] WLAN-Konfiguration abgeschlossen." -ForegroundColor Green
+
+# 3. E-Mail-Setup für Microsoft 365
+Write-Host "[INFO] Füge Firmen-E-Mail-Konto hinzu..." -ForegroundColor Yellow
+$EmailAccount = "firmenkonto@unternehmen.com"
+$EmailPassword = "SicheresPasswort!"
+Start-Process "outlook.exe" -ArgumentList "/importprf firmen-email.prf"
+Write-Host "[OK] Firmen-E-Mail wurde eingerichtet." -ForegroundColor Green
+
+# 4. VPN-Zugang einrichten
+Write-Host "[INFO] Konfiguriere VPN-Zugang..." -ForegroundColor Yellow
+$vpnName = "Firmen-VPN"
+$vpnServer = "vpn.unternehmen.com"
+Add-VpnConnection -Name $vpnName -ServerAddress $vpnServer -TunnelType SplitTunnel -AuthenticationMethod MSChapv2 -EncryptionLevel Required
+Write-Host "[OK] VPN-Zugang erfolgreich eingerichtet." -ForegroundColor Green
+
+# 5. Sicherheitsrichtlinien anwenden
+Write-Host "[INFO] Anwenden von Sicherheitsrichtlinien..." -ForegroundColor Yellow
+# Beispiel: Bildschirmsperre nach 5 Minuten
+Start-Process "gpedit.msc" -ArgumentList "/config screensaver-timeout=300"
+Write-Host "[OK] Sicherheitsrichtlinien erfolgreich angewendet." -ForegroundColor Green
+
+Write-Host "[INFO] Firmen-Handy wurde erfolgreich konfiguriert!" -ForegroundColor Cyan
