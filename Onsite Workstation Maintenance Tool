@@ -1,0 +1,34 @@
+# Onsite Workstation Maintenance Tool
+# Erstellt von: João Zamba
+# Beschreibung: Dieses PowerShell-Skript führt eine grundlegende Wartung einer Windows-Arbeitsstation durch.
+
+Write-Host "[INFO] Starte Wartung der Arbeitsstation..." -ForegroundColor Cyan
+
+# Temporäre Dateien löschen
+Write-Host "[STEP 1] Temporäre Dateien löschen..." -ForegroundColor Yellow
+Remove-Item -Path "C:\Windows\Temp\*" -Force -Recurse -ErrorAction SilentlyContinue
+Remove-Item -Path "$env:USERPROFILE\AppData\Local\Temp\*" -Force -Recurse -ErrorAction SilentlyContinue
+Write-Host "[OK] Temporäre Dateien entfernt." -ForegroundColor Green
+
+# Festplattenüberprüfung starten
+Write-Host "[STEP 2] Festplattenüberprüfung starten..." -ForegroundColor Yellow
+Start-Process -FilePath "chkdsk" -ArgumentList "C: /f /r" -NoNewWindow -Wait
+Write-Host "[INFO] Festplattenüberprüfung abgeschlossen." -ForegroundColor Green
+
+# Speicherplatz bereinigen
+Write-Host "[STEP 3] Speicherplatz bereinigen..." -ForegroundColor Yellow
+Start-Process -FilePath "cleanmgr" -ArgumentList "/sagerun:1" -NoNewWindow -Wait
+Write-Host "[OK] Speicherplatz bereinigt." -ForegroundColor Green
+
+# Systemdateien überprüfen
+Write-Host "[STEP 4] Systemdateien überprüfen..." -ForegroundColor Yellow
+sfc /scannow
+Write-Host "[INFO] Systemdateien wurden überprüft." -ForegroundColor Green
+
+# Nicht benötigte Dienste neustarten
+Write-Host "[STEP 5] Nicht benötigte Dienste neustarten..." -ForegroundColor Yellow
+Restart-Service -Name "Spooler" -Force
+Restart-Service -Name "wuauserv" -Force
+Write-Host "[OK] Dienste wurden neu gestartet." -ForegroundColor Green
+
+Write-Host "[INFO] Wartung abgeschlossen! Bitte starten Sie den PC neu." -ForegroundColor Cyan
